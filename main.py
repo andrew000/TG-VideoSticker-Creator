@@ -1,4 +1,5 @@
 import subprocess
+import os
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from time import perf_counter
@@ -9,6 +10,12 @@ PARTS_DIR_PATH = Path("parts")
 SLICES_DIR_PATH.mkdir(exist_ok=True)
 PARTS_DIR_PATH.mkdir(exist_ok=True)
 
+if os.name == 'nt':
+    ffmpeg = './ffmpeg.exe'
+    ffprobe = './ffprobe.exe'
+else:
+    ffmpeg = 'ffmpeg'
+    ffprobe = 'ffprobe'
 
 class Slice:
     def __init__(self, slice_id: int):
@@ -33,7 +40,7 @@ class Part:
 def get_duration(path: Path) -> float:
     result = subprocess.run(
         [
-            "./ffprobe.exe",
+            ffprobe,
             "-v",
             "error",
             "-show_entries",
@@ -66,7 +73,7 @@ def slice_video(path: Path, start: float, end: float, output: Path):
     # .\ffmpeg.exe -loglevel quiet -u -i $path -ss $start -to $end -c copy $output
     subprocess.run(
         [
-            "./ffmpeg.exe",
+            ffmpeg,
             "-loglevel",
             "quiet",
             "-y",
@@ -105,7 +112,7 @@ def make_webm(video_slice: Slice, fps: int, part: Part):
 
     subprocess.run(
         [
-            "./ffmpeg.exe",
+            ffmpeg,
             "-loglevel",
             "quiet",
             "-y",
